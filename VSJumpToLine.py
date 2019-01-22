@@ -60,6 +60,7 @@ class PleaseWait(threading.Thread):
         """
         Turn progress on
         """
+        self.daemon = True
         self.start()
 
     def please_wait_off(self):
@@ -77,7 +78,7 @@ class VSJumpToLine(object):
     """
     app_name = "VSJumpToLine"   # application name, visual studio jump to line
     app_name_short = "jtol"     # application short name
-    app_version = "v1.0.0"      # application version (major.minor.patch)
+    app_version = "v1.0.1"      # application version (major.minor.patch)
     header_len = 100
 
     def __init__(self,args):
@@ -184,7 +185,6 @@ class VSJumpToLine(object):
               (line.lower().find('error[') > -1) or    # IAR
               (line.lower().find('undefined reference') > -1)): # GCC
             severity = self.severity_error
-        logging.debug("ccccc {}".format(severity))
         return severity
 
     def __match_line_and_column(self, line):
