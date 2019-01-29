@@ -38,6 +38,36 @@ import time
 import re
 import glob
 
+class FormatSize:
+    """
+    Format sizes in a human readable format (Base 10 (1000 bytes)).
+    """
+    def __init__(self, size):
+        self.size = size
+
+    def __str__(self):
+        byte = 1                    # B
+        kilobyte = byte * 1000;     # kB 1000 Byte
+        megabyte = kilobyte * 1000; # MB 1 000 000 Byte
+        gigabyte = megabyte * 1000; # GB 1 000 000 000 Byte
+        if self.size >= gigabyte:
+            self.size = self.size / gigabyte
+            return "{:.2f}GB".format(self.size)
+        elif self.size >= megabyte:
+            self.size = self.size / megabyte
+            return "{:.2f}MB".format(self.size)
+        elif self.size >= kilobyte:
+            self.size = self.size / kilobyte
+            return "{:.2f}kB".format(self.size)
+        else:
+            return "{}B".format(self.size)
+
+    def __bool__(self):
+        if self.size > 0:
+            return True
+        else:
+            return False
+
 class PleaseWait(threading.Thread):
     """
     Simple implementation of a progress bar to indicate to the user that the progress continues.
@@ -78,7 +108,7 @@ class VSJumpToLine(object):
     """
     app_name = "VSJumpToLine"   # application name, visual studio jump to line
     app_name_short = "jtol"     # application short name
-    app_version = "v1.0.1"      # application version (major.minor.patch)
+    app_version = "v1.0.2"      # application version (major.minor.patch)
     header_len = 100
 
     def __init__(self,args):
@@ -117,7 +147,7 @@ class VSJumpToLine(object):
         self.time_start = time.time()
         self.time_end = time.time()
 
-        self.result_list = [ [self.severity_ignore, "first entry"]]
+        self.result_list = []
 
         self.__process_cmdline(args)
         self.__process_input_file()
@@ -147,27 +177,6 @@ class VSJumpToLine(object):
             if (path[-1] == '/' or path[-1] == '\\'):
                 path = path[:-1]
         return path
-
-    def _format_size(self, size):
-        """
-        Format sizes in a human readable format (Base 10 (1000 bytes)).
-        """
-        byte = 1                    # B    
-        kilobyte = byte * 1000;     # kB 1000 Byte
-        megabyte = kilobyte * 1000; # MB 1 000 000 Byte
-        gigabyte = megabyte * 1000; # GB 1 000 000 000 Byte
-        res = ""    
-        if size >= gigabyte:
-            size = size / gigabyte
-            return "{:.2f}GB".format(size)
-        elif size >= megabyte:
-            size = size / megabyte
-            return "{:.2f}MB".format(size)
-        elif size >= kilobyte:
-            size = size / kilobyte
-            return "{:.2f}kB".format(size)
-        else:
-            return "{}B".format(size)
 
     def __match_severity(self, line):
         """
@@ -290,7 +299,6 @@ class VSJumpToLine(object):
         Add entry to result list.
         If the option is used to suppress the same messages, only the first message is added to the list.
         """
-
         abs_path_line = self.__convert_to_absolute_path(line_processed)
         if abs_path_line:
             line_processed = abs_path_line
@@ -510,14 +518,15 @@ class VSJumpToLine(object):
         header_title = " " + self.app_name + " " + self.app_version + " "
         header_title = header_title.center(self.header_len,'-')
         header_line = header_line.center(self.header_len,'-')
-    
+
         self._print_normal(header_line)
         self._print_normal(header_title)
         self._print_normal(header_line)
+
         if not self.option_quiet:
             self._print_normal("options:")
             self._print_normal("--filename: <{}>".format(self.option_file_input))
-            self._print_normal("--filename: size: <{}>, modified: <{}>".format(self._format_size(os.path.getsize(self.option_file_input)),time.strftime("%Y-%m-%dT%H:%M:%S",time.localtime(statbuf.st_mtime))))
+            self._print_normal("--filename: size: <{}>, modified: <{}>".format(FormatSize(os.path.getsize(self.option_file_input)),time.strftime("%Y-%m-%dT%H:%M:%S",time.localtime(statbuf.st_mtime))))
             self._print_normal("--directory: <{}>".format(self.option_working_dir))
             self._print_normal("--prefix: <{}>, --multi: <{}>, --suppress: <{}>, --compact: <{}>".format(self.option_line_prefix, self.option_multi_line, self.option_suppress_identical,self.option_compact))
             self._print_normal(header_line)
