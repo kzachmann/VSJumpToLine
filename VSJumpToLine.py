@@ -48,9 +48,9 @@ class FormatSize:
 
     def __str__(self):
         byte = 1                    # B
-        kilobyte = byte * 1000;     # kB 1000 Byte
-        megabyte = kilobyte * 1000; # MB 1 000 000 Byte
-        gigabyte = megabyte * 1000; # GB 1 000 000 000 Byte
+        kilobyte = byte * 1000      # kB 1000 Byte
+        megabyte = kilobyte * 1000  # MB 1 000 000 Byte
+        gigabyte = megabyte * 1000  # GB 1 000 000 000 Byte
         if self.size >= gigabyte:
             self.size = self.size / gigabyte
             return "{:.2f}GB".format(self.size)
@@ -83,8 +83,8 @@ class PleaseWait(threading.Thread):
         time.sleep(0.2)
         while not self.stopper.is_set():
             self.dot = 1
-            sys.stdout.write(".");
-            sys.stdout.flush();
+            sys.stdout.write(".")
+            sys.stdout.flush()
             time.sleep(0.5)
 
     def please_wait_on(self):
@@ -100,8 +100,8 @@ class PleaseWait(threading.Thread):
         """
         self.stopper.set()
         if self.dot:
-            sys.stdout.write("\n");
-        sys.stdout.flush();
+            sys.stdout.write("\n")
+        sys.stdout.flush()
 
 class Severity(enum.IntEnum):
     """
@@ -123,7 +123,7 @@ class VSJumpToLine:
     """
     app_name = "VSJumpToLine"   # application name, visual studio jump to line
     app_name_short = "jtol"     # application short name
-    app_version = "v1.0.2"      # application version (major.minor.patch)
+    app_version = "v1.0.3"      # application version (major.minor.patch)
     header_len = 100
 
     def __init__(self,args):
@@ -301,7 +301,7 @@ class VSJumpToLine:
         else:
             return ""
 
-    def __append_result_list(self, result_list, severity, line_processed, line_before):
+    def __append_result_list(self, severity, line_processed, line_before):
         """
         Add entry to result list.
         If the option is used to suppress the same messages, only the first message is added to the list.
@@ -388,19 +388,19 @@ class VSJumpToLine:
                         if line_processed_line_column:
                             line_processed_special = self.__match_special(line_processed_line_column)
                             if line_processed_special:
-                                severity = self.__append_result_list(self.result_list, severity, line_processed_special, line_before)
+                                severity = self.__append_result_list(severity, line_processed_special, line_before)
                                 continue
                             else:
-                                severity = self.__append_result_list(self.result_list, severity, line_processed_line_column, line_before)
+                                severity = self.__append_result_list(severity, line_processed_line_column, line_before)
                         else:
                             # Already in Visual Studio format or something new that is not yet covered
                             logging.info("no match for line: {}".format(file_line))
-                            self.__append_result_list(self.result_list, severity, file_line, line_before)
+                            self.__append_result_list(severity, file_line, line_before)
                 pw.please_wait_off()
         except UnicodeDecodeError as err:
             self._print_error("filename: <{}>, err: {}".format(self.option_file_input,err))
-            please_wait_off(wait_thread)
-            sys.exit(exit_fail_decode)
+            pw.please_wait_off()
+            sys.exit(self.exit_fail_decode)
 
     def __print_lines(self, severity, result_list):
         """
@@ -469,7 +469,7 @@ class VSJumpToLine:
         Start the entire process.
         """
         try:
-            opts, args = getopt.getopt(argv[1:],"h?scqm:f:p:d:",["help", "quiet", "multi=", "suppress", "compact", "file=","prefix=","dir="])
+            opts, _args = getopt.getopt(argv[1:],"h?scqm:f:p:d:",["help", "quiet", "multi=", "suppress", "compact", "file=","prefix=","dir="])
         except getopt.GetoptError as err:
             self._print_error(err)
             self.usage()
@@ -491,7 +491,7 @@ class VSJumpToLine:
                     self._print_error("argument --multi allows only '1','2' or '3'")
                     self.usage()
                     sys.exit(self.exit_fail_option)
-                    break;
+                    break
             elif opt in ("-s", "--suppress"):
                 self.option_suppress_identical = 1
             elif opt in ("-c", "--compact"):
