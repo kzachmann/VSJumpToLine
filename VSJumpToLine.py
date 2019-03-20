@@ -2,7 +2,7 @@
 ABOUT THIS TOOL:
 ================
 Converts the output of tools such as GCC and Doxygen into a Visual Studio
-readable output format. The output of this tool can be used in the output window 
+readable output format. The output of this tool can be used in the output window
 of Visual Studio to jump to the corresponding line in the editor.
 
 LICENSE:
@@ -126,7 +126,7 @@ class VSJumpToLine:
     app_version = "v1.0.3"      # application version (major.minor.patch)
     header_len = 100
 
-    def __init__(self,args):
+    def __init__(self, args):
         self.exit_success = 0
         self.exit_fail_option = 1
         self.exit_fail_not_exist = 2
@@ -163,7 +163,7 @@ class VSJumpToLine:
         """
         Small helper for normal output.
         """
-        print("{}: {}".format(self.app_name_short,string))
+        print("{}: {}".format(self.app_name_short, string))
         sys.stdout.flush()
 
     def _print_error(self, string):
@@ -171,7 +171,7 @@ class VSJumpToLine:
         Small helper for error output.
         """
         print("")
-        print("{}: ERROR: {}\n".format(self.app_name_short,string))
+        print("{}: ERROR: {}\n".format(self.app_name_short, string))
         sys.stdout.flush()
 
     def _format_paths(self, path):
@@ -221,7 +221,7 @@ class VSJumpToLine:
 
         # (GCC/doxygen/cmocka | BullseyeCoverage | IAR)
         regex = r":(\d+):((\d+):)?|(\"(.+)\",(\d+))|(\((\d+)\) :)"
-        res = re.search(regex,line)
+        res = re.search(regex, line)
         logging.debug("{}".format(res))
         if res:
             # ':124:43:'
@@ -252,12 +252,12 @@ class VSJumpToLine:
         """
         Try to match special format assume that line number has been already matched by
         the function 'self.__match_line_and_column()'.
-       
+
         1. cmocka (unit testing framework for C) output
         '[   LINE   ] --- testcases.c(9): error: Failure!'
         """
         regex = r"^\[   LINE   \] --- (.+)"
-        res = re.search(regex,line)
+        res = re.search(regex, line)
         logging.debug("{}".format(res))
         if res:
             logging.debug("{}".format(res.group(1)))
@@ -276,8 +276,8 @@ class VSJumpToLine:
             return ""
 
         regex = r"((^.+)\.(.+))(\(.+\)):"
-        res = re.search(regex,line)
-        logging.debug("line: {} res:{}".format(line,res))
+        res = re.search(regex, line)
+        logging.debug("line: {} res:{}".format(line, res))
         if res:
             group1_str = res.group(1)
             # If containing any '/' or '\' assuming that is already an absolute or relative path
@@ -339,9 +339,9 @@ class VSJumpToLine:
             # For multi line option (look one line before)
             if self.option_multi_line and line_before:
                 logging.debug("line_look_before: {}".format(line_before))
-                self.result_list.append([ severity + Severity.offset_before , line_before ])
+                self.result_list.append([ severity + Severity.offset_before, line_before])
 
-            self.result_list.append([ severity, line_processed ])
+            self.result_list.append([severity, line_processed])
 
             return severity
         else:
@@ -360,14 +360,14 @@ class VSJumpToLine:
                 line_before = None
                 for file_line in file_tool_output:
                     self.cnt_lines += 1
-                    file_line = file_line.replace('\n','')
-                    file_line = file_line.replace('\r','')
+                    file_line = file_line.replace('\n', '')
+                    file_line = file_line.replace('\r', '')
 
                     severity_last = severity
                     severity = self.__match_severity(file_line)
 
                     # Match line before, currently only implemented for GCC
-                    if (re.search(r": In function.+:",file_line, re.IGNORECASE)):
+                    if (re.search(r": In function.+:", file_line, re.IGNORECASE)):
                         line_before = file_line
                     else:
                         line_before = ""
@@ -378,7 +378,7 @@ class VSJumpToLine:
                             # Check if line contains only spaces
                             if not file_line.isspace():
                                 severity = severity_last
-                                self.result_list.append([ severity_last + Severity.offset_behind, file_line ])
+                                self.result_list.append([severity_last + Severity.offset_behind, file_line])
                                 continue
 
                     if severity > Severity.ignore:
@@ -398,7 +398,7 @@ class VSJumpToLine:
                             self.__append_result_list(severity, file_line, line_before)
                 pw.please_wait_off()
         except UnicodeDecodeError as err:
-            self._print_error("filename: <{}>, err: {}".format(self.option_file_input,err))
+            self._print_error("filename: <{}>, err: {}".format(self.option_file_input, err))
             pw.please_wait_off()
             sys.exit(self.exit_fail_decode)
 
@@ -411,13 +411,13 @@ class VSJumpToLine:
         for entry in result_list:
             if severity == entry[0]:
                 if first_message or self.option_compact or line_before_printed:
-                    print("{}{}".format(self.option_line_prefix,entry[1]))
+                    print("{}{}".format(self.option_line_prefix, entry[1]))
                 else:
-                    print("\n{}{}".format(self.option_line_prefix,entry[1]))
+                    print("\n{}{}".format(self.option_line_prefix, entry[1]))
                 sys.stdout.flush()
                 first_message = False
                 line_before_printed = False
-            elif (self.option_multi_line==1 or self.option_multi_line==3) and (severity + Severity.offset_before == entry[0]): # line before
+            elif (self.option_multi_line == 1 or self.option_multi_line == 3) and (severity + Severity.offset_before == entry[0]): # line before
                 # without prefix
                 if first_message or self.option_compact:
                     print("{}".format(entry[1]))
@@ -426,7 +426,7 @@ class VSJumpToLine:
                 sys.stdout.flush()
                 first_message = False
                 line_before_printed = True
-            elif (self.option_multi_line==2 or self.option_multi_line==3) and (severity + Severity.offset_behind == entry[0]): # line behind
+            elif (self.option_multi_line == 2 or self.option_multi_line == 3) and (severity + Severity.offset_behind == entry[0]): # line behind
                 # without prefix
                 print("{}".format(entry[1]))
                 sys.stdout.flush()
@@ -436,9 +436,9 @@ class VSJumpToLine:
         Print usage if an unknown argument was used or '-h' was entered.
         """
         header_line = ""
-        header_line = header_line.center(self.header_len,'-')
-        header_title =  " " + self.app_name + " " + self.app_version + " - Help "
-        header_title = header_title.center(self.header_len,'-')
+        header_line = header_line.center(self.header_len, '-')
+        header_title = " " + self.app_name + " " + self.app_version + " - Help "
+        header_title = header_title.center(self.header_len, '-')
 
         self._print_normal(header_line)
         self._print_normal(header_title)
@@ -469,7 +469,7 @@ class VSJumpToLine:
         Start the entire process.
         """
         try:
-            opts, _args = getopt.getopt(argv[1:],"h?scqm:f:p:d:",["help", "quiet", "multi=", "suppress", "compact", "file=","prefix=","dir="])
+            opts, _args = getopt.getopt(argv[1:], "h?scqm:f:p:d:", ["help", "quiet", "multi=", "suppress", "compact", "file=", "prefix=", "dir="])
         except getopt.GetoptError as err:
             self._print_error(err)
             self.usage()
@@ -523,8 +523,8 @@ class VSJumpToLine:
 
         header_line = ""
         header_title = " " + self.app_name + " " + self.app_version + " "
-        header_title = header_title.center(self.header_len,'-')
-        header_line = header_line.center(self.header_len,'-')
+        header_title = header_title.center(self.header_len, '-')
+        header_line = header_line.center(self.header_len, '-')
 
         self._print_normal(header_line)
         self._print_normal(header_title)
@@ -533,9 +533,9 @@ class VSJumpToLine:
         if not self.option_quiet:
             self._print_normal("options:")
             self._print_normal("--filename: <{}>".format(self.option_file_input))
-            self._print_normal("--filename: size: <{}>, modified: <{}>".format(FormatSize(os.path.getsize(self.option_file_input)),time.strftime("%Y-%m-%dT%H:%M:%S",time.localtime(statbuf.st_mtime))))
+            self._print_normal("--filename: size: <{}>, modified: <{}>".format(FormatSize(os.path.getsize(self.option_file_input)), time.strftime("%Y-%m-%dT%H:%M:%S", time.localtime(statbuf.st_mtime))))
             self._print_normal("--directory: <{}>".format(self.option_working_dir))
-            self._print_normal("--prefix: <{}>, --multi: <{}>, --suppress: <{}>, --compact: <{}>".format(self.option_line_prefix, self.option_multi_line, self.option_suppress_identical,self.option_compact))
+            self._print_normal("--prefix: <{}>, --multi: <{}>, --suppress: <{}>, --compact: <{}>".format(self.option_line_prefix, self.option_multi_line, self.option_suppress_identical, self.option_compact))
             self._print_normal(header_line)
 
     def print_output(self):
@@ -544,19 +544,19 @@ class VSJumpToLine:
         """
         if self.cnt_notes:
             header_title = " notes: {} ".format(self.cnt_notes)
-            header_title = header_title.center(self.header_len,'+')
+            header_title = header_title.center(self.header_len, '+')
             self._print_normal(header_title)
             self.__print_lines(Severity.note, self.result_list)
 
         if self.cnt_warnings:
             header_title = " warnings: {} ".format(self.cnt_warnings)
-            header_title = header_title.center(self.header_len,'*')
+            header_title = header_title.center(self.header_len, '*')
             self._print_normal(header_title)
             self.__print_lines(Severity.warning, self.result_list)
 
         if self.cnt_errors:
             header_title = " errors: {} ".format(self.cnt_errors)
-            header_title = header_title.center(self.header_len,'#')
+            header_title = header_title.center(self.header_len, '#')
             self._print_normal(header_title)
             self.__print_lines(Severity.error, self.result_list)
 
@@ -564,9 +564,9 @@ class VSJumpToLine:
 
         header_line = ""
         if self.cnt_errors or self.cnt_warnings:
-            header_line = header_line.center(self.header_len,'~')
+            header_line = header_line.center(self.header_len, '~')
         else:
-            header_line = header_line.center(self.header_len,'=')
+            header_line = header_line.center(self.header_len, '=')
 
         self._print_normal(header_line)
         self._print_normal("finished (totals): time: {:.2f}s, errors: {}/{}, warnings: {}/{}, notes: {}/{}, lines: {}".format(
