@@ -127,10 +127,10 @@ class VSJumpToLine:
     header_len = 100
 
     def __init__(self, args):
-        self.exit_success = 0
-        self.exit_fail_option = 1
-        self.exit_fail_not_exist = 2
-        self.exit_fail_decode = 3
+        self.EXIT_SUCCESS = 0
+        self.EXIT_FAIL_OPTION = 1
+        self.EXIT_FAIL_NOT_EXIST = 2
+        self.EXIT_FAIL_DECODE = 3
 
         self.cnt_suppressed_infos = 0
         self.cnt_suppressed_notes = 0
@@ -400,7 +400,7 @@ class VSJumpToLine:
         except UnicodeDecodeError as err:
             self._print_error("filename: <{}>, err: {}".format(self.option_file_input, err))
             pw.please_wait_off()
-            sys.exit(self.exit_fail_decode)
+            sys.exit(self.EXIT_FAIL_DECODE)
 
     def __print_lines(self, severity, result_list):
         """
@@ -473,11 +473,11 @@ class VSJumpToLine:
         except getopt.GetoptError as err:
             self._print_error(err)
             self.usage()
-            sys.exit(self.exit_fail_option)
+            sys.exit(self.EXIT_FAIL_OPTION)
         for opt, arg in opts:
             if opt in ("-h", "-?", "--help"):
                 self.usage()
-                sys.exit(self.exit_success)
+                sys.exit(self.EXIT_SUCCESS)
             elif opt in ("-f", "--file"):
                 self.option_file_input = arg
                 logging.debug("--file: {}".format(self.option_file_input))
@@ -490,7 +490,7 @@ class VSJumpToLine:
                 else:
                     self._print_error("argument --multi allows only '1','2' or '3'")
                     self.usage()
-                    sys.exit(self.exit_fail_option)
+                    sys.exit(self.EXIT_FAIL_OPTION)
                     break
             elif opt in ("-s", "--suppress"):
                 self.option_suppress_identical = 1
@@ -505,13 +505,13 @@ class VSJumpToLine:
         if not self.option_file_input:
             self._print_error("No input file specified!")
             self.usage()
-            sys.exit(self.exit_fail_option)
+            sys.exit(self.EXIT_FAIL_OPTION)
 
         self.option_file_input = self._format_paths(self.option_file_input)
 
         if not os.path.isfile(self.option_file_input):
             self._print_error("--filename: <{}>, file does not exits!".format(self.option_file_input))
-            sys.exit(self.exit_fail_not_exist)
+            sys.exit(self.EXIT_FAIL_NOT_EXIST)
         else:
             statbuf = os.stat(self.option_file_input)
 
@@ -519,7 +519,7 @@ class VSJumpToLine:
             self.option_working_dir = self._format_paths(self.option_working_dir)
             if not os.path.isdir(self.option_working_dir):
                 self._print_error("--directory: <{}>, directory does not exits!".format(self.option_working_dir))
-                sys.exit(self.exit_fail_not_exist)
+                sys.exit(self.EXIT_FAIL_NOT_EXIST)
 
         header_line = ""
         header_title = " " + self.app_name + " " + self.app_version + " "
@@ -585,7 +585,7 @@ def main(args):
     jtol = VSJumpToLine(args)
     jtol.print_output()
 
-    sys.exit(jtol.exit_success)
+    sys.exit(jtol.EXIT_SUCCESS)
 
 if __name__ == "__main__":
     main(sys.argv)
