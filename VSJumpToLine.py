@@ -123,7 +123,7 @@ class VSJumpToLine:
     """
     app_name = "VSJumpToLine"   # application name, visual studio jump to line
     app_name_short = "jtol"     # application short name
-    app_version = "v1.0.3"      # application version (major.minor.patch)
+    app_version = "v1.1.0"      # application version (major.minor.patch)
     header_len = 100
 
     def __init__(self, args):
@@ -191,7 +191,9 @@ class VSJumpToLine:
         """
         severity = Severity.ignore
         if   ((line.lower().find('note:') > -1) or     # GCC, Doxygen
-              (line.lower().find('note[') > -1)):      # IAR
+              (line.lower().find('note[') > -1) or     # IAR
+              (line.lower().find('info:') > -1) or     # PC-Lint
+              (line.lower().find('info[') > -1)):      # PC-Lint
             severity = Severity.note
         elif ((line.lower().find('warning:') > -1) or  # GCC, Doxygen, cmocka
               (line.lower().find('warning[') > -1) or  # IAR, BullseyeCoverage
